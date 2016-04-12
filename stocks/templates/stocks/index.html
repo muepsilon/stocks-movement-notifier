@@ -1,0 +1,13 @@
+{% load staticfiles  %}
+<html>
+<head>
+  <title>Portfolio</title>
+  {% include "stocks/stylesheets.html" %}
+</head>
+<body ng-app="stockWatch" ng-controller="indexController">
+
+  <div ui-view class="container"></div>
+
+  {% include "stocks/javascripts.html" %}
+</body>
+</html>

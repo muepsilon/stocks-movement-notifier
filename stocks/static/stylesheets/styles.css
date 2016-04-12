@@ -1,0 +1,44 @@
+/*CSS*/
+
+body{
+  background-color: rgb(240,240,240); 
+}
+.container{
+  width: 80%;
+  background-color: rgb(255,255,255);
+  max-width: 1200px;
+  min-width: 800px;
+  min-height: 800px;
+  padding: 0;
+}
+.header{
+  background-color: rgb(94,68,193);
+  color:  white;
+  width: 100%;
+}
+
+.positive{
+  background-color: green;
+  color: white;
+  transition: all 0.3s ease 0s;
+}
+.negative{
+  background-color: red;
+  color: white;
+  transition: all 0.3s ease 0s;
+}
+
+.edit-options{
+  margin:    30px 0;
+}
+.overall-portfolio{
+  font-size: 16px;
+  margin:  20px 0;
+}
+.overall-portfolio .pLabel{
+  font-weight: bold;
+  padding:    10px;
+}
+.overall-portfolio .pValue{
+  padding: 10px;
+}
