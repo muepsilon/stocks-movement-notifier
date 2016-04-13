@@ -51,11 +51,18 @@
     })
     // Function blocks
     function add_stock(){
-      Layout.add_stock(vm.formdata).then(function(response){
-        vm.show_alert(" Stock added in your portfolio", "success");
-        vm.stock_operation = "";
-        vm.get_stocks();
-      })
+      if (vm.formdata.company_name.length > 1){
+        Layout.add_stock(vm.formdata).then(function(response){
+          vm.show_alert(" Stock added in your portfolio", "success");
+          vm.stock_operation = "";
+          vm.formdata = {};
+          vm.formdata.symbol = "";
+          vm.formdata.company_name = "";
+          vm.get_stocks();
+        });
+      } else {
+        vm.show_alert(" No Company is listed with given Symbol", "failure");
+      }
     }
 
     function alert(msg,type){
@@ -94,6 +101,7 @@
         vm.portfolio.percent_change = Math.ceil(vm.portfolio.change/vm.portfolio.invested_amount*10000)/100;
 
         vm.showpage = true;
+
         // Notification system
         vm.notification_text_high = ""
         vm.notification_text_low = ""
