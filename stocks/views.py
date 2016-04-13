@@ -36,7 +36,7 @@ def portfolio(request):
   nse = Nse()
   results = []
   response = None
-  keys = ['lastPrice','low52','high52','open','companyName','symbol']
+  keys = ['lastPrice','low52','high52','previousClose','companyName','symbol']
 
   stocks = Stock.objects.all()
 
@@ -56,7 +56,7 @@ def portfolio(request):
     filter_response['invested_amount'] = math.ceil(stock.invested_price*stock.N_stocks)
     filter_response['amount_change'] = math.ceil(stock.N_stocks*(filter_response['lastPrice'] - stock.invested_price))
     filter_response['overall_change'] = math.ceil(((filter_response['lastPrice']/filter_response['invested_price'] - 1)*100)*100)/100
-    filter_response['daily_change'] = math.ceil(((filter_response['lastPrice']/filter_response['open'] - 1)*100)*100)/100
+    filter_response['daily_change'] = math.ceil(((filter_response['lastPrice']/filter_response['previousClose'] - 1)*100)*100)/100
 
     # Append the results
     results.append(filter_response)

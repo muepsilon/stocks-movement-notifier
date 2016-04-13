@@ -5,14 +5,18 @@
   angular.module('stockWatch.controllers',[])
     .controller('indexController', indexController);
 
-  indexController.$inject = ['$scope','Layout','$interval'];
+  indexController.$inject = ['$scope','Layout','$interval','$window','$timeout'];
 
-  function indexController($scope,Layout, $interval){
+  function indexController($scope,Layout, $interval,$window,$timeout){
 
     var vm = this;
+    vm.showpage = false;
     vm.get_stocks = get_stocks;
     vm.setInterval = 60*5;
-    vm.notification_text = "";
+    vm.alert = {"success": false, "failure": false, "message": ""};
+    vm.show_alert = alert;
+    vm.notification_text_high = "";
+    vm.notification_text_low = "";
     vm.addStock =  add_stock;
     vm.stock_operation = "";
     vm.stock_id = 0;
@@ -48,10 +52,28 @@
     // Function blocks
     function add_stock(){
       Layout.add_stock(vm.formdata).then(function(response){
-        console.log(response);
+        vm.show_alert(" Stock added in your portfolio", "success");
         vm.stock_operation = "";
         vm.get_stocks();
       })
+    }
+
+    function alert(msg,type){
+
+      vm.alert.message = msg;
+
+      if (type == "success") {
+        vm.alert.success = true;
+      } else if(type == "failure"){
+        vm.alert.failure = true;
+      }
+      $timeout(function() {
+        if (type == "success") {
+          vm.alert.success = false;
+        } else if(type == "failure"){
+          vm.alert.failure = false;
+        }
+      }, 3000);
     }
     function get_stocks(){
       Layout.get_stocks()
@@ -71,27 +93,39 @@
         };
         vm.portfolio.percent_change = Math.ceil(vm.portfolio.change/vm.portfolio.invested_amount*10000)/100;
 
+        vm.showpage = true;
         // Notification system
+        vm.notification_text_high = ""
+        vm.notification_text_low = ""
         if (vm.stocksList.length > 0) {
           $scope.selected_stock = vm.stocksList[0].id;
 
           if (Notification.permission == "granted") {
 
             for (var i = vm.stocksList.length - 1; i >= 0; i--) {
-              if(vm.stocksList[i].trigger_price > vm.stocksList[i].lastPrice){
-                vm.notification_text += vm.stocksList[i].symbol + " " + vm.stocksList[i].lastPrice.toString()
+              if(vm.stocksList[i].trigger_price_high < vm.stocksList[i].lastPrice){
+                vm.notification_text_high += vm.stocksList[i].symbol + " " + vm.stocksList[i].lastPrice.toString()
+                  + "/" + vm.stocksList[i].invested_price + "\n";
+              }
+              if(vm.stocksList[i].trigger_price_low > vm.stocksList[i].lastPrice){
+                vm.notification_text_low += vm.stocksList[i].symbol + " " + vm.stocksList[i].lastPrice.toString()
                   + "/" + vm.stocksList[i].invested_price + "\n";
               }
             };
-            if(vm.notification_text.length > 1){
-              var notification = new Notification('Market Status', {
-                icon: 'http://icons.iconarchive.com/icons/iynque/ios7-style/128/Stocks-icon.png',
-                body: vm.notification_text,
+            if(vm.notification_text_high.length > 1){
+              var notification = new Notification('Sell', {
+                icon: 'http://www.iconsdb.com/icons/preview/soylent-red/sell-2-xxl.png',
+                body: vm.notification_text_high,
+              });
+            }
+            if(vm.notification_text_low.length > 1){
+              var notification = new Notification('Buy', {
+                icon: 'https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/shopping-circle-green-128.png',
+                body: vm.notification_text_low,
               });
             }
           };
         };
-        console.log(vm.stocksList[0]);
       };
 
     });
