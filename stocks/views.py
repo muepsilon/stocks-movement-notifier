@@ -50,6 +50,7 @@ def portfolio(request):
     # Process and add data
     filter_response['id'] = stock.pk
     filter_response['target_price'] = stock.target_price
+    filter_response['N_stocks'] = stock.N_stocks
     filter_response['trigger_price_low'] = stock.trigger_price_low
     filter_response['trigger_price_high'] = stock.trigger_price_high
     filter_response['invested_price'] = stock.invested_price

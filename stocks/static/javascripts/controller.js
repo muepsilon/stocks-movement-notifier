@@ -12,12 +12,20 @@
     var vm = this;
     vm.showpage = false;
     vm.get_stocks = get_stocks;
-    vm.setInterval = 60*5;
+    vm.addOption = "new";
+    vm.refreshOption = [30,60,60*2,60*5,60*10,60*15,60*30];
+    vm.refreshOptionList = [];
+    vm.createRefreshOptionList = createRefreshOptionList;
     vm.alert = {"success": false, "failure": false, "message": ""};
     vm.show_alert = alert;
     vm.notification_text_high = "";
     vm.notification_text_low = "";
+    vm.process = {"searching": false};
+    vm.clearSelected = clearSelected;
+    vm.delete_stock = delete_stock;
+    vm.addToExisting = addToExisting;
     vm.addStock =  add_stock;
+    vm.editStock = editStock;
     vm.stock_operation = "";
     vm.stock_id = 0;
     vm.formdata = {};
@@ -27,17 +35,18 @@
     vm.portfolio.invested_amount = 0;
     vm.portfolio.change = 0;
     vm.portfolio.percent_change = 0;
-
-    // Scope variables
-    $scope.selected_stock = -1;
-
+    vm.selected_stock = "";
     vm.get_stocks();
 
-    $interval(vm.get_stocks, 1000*vm.setInterval);
+    vm.createRefreshOptionList();
+    vm.setInterval = vm.refreshOptionList[3];
+
+    $interval(vm.get_stocks, 1000*vm.refreshOption[vm.setInterval.id]);
 
     $scope.$watch(function(){return vm.formdata.symbol},function(){
       if (vm.formdata.symbol !== undefined) {
         if(vm.formdata.symbol.length > 0){
+          vm.process.searching = true;
           Layout.validate_symbol(vm.formdata.symbol)
           .then(function(response){
             if (response.data.is_valid == true) {
@@ -45,6 +54,7 @@
             } else {
               vm.formdata.company_name = "";
             }
+            vm.process.searching = false;
           });
         }
       };
@@ -52,19 +62,84 @@
     // Function blocks
     function add_stock(){
       if (vm.formdata.company_name.length > 1){
-        Layout.add_stock(vm.formdata).then(function(response){
+        Layout.add_stock(vm.formdata).then(function successCallback(response){
           vm.show_alert(" Stock added in your portfolio", "success");
-          vm.stock_operation = "";
-          vm.formdata = {};
-          vm.formdata.symbol = "";
-          vm.formdata.company_name = "";
+          vm.clearSelected();
           vm.get_stocks();
+        }, function failureCallback(response){
+          if (response.status == 400) {
+            if (response.data.symbol != null) {
+              msg = response.data.symbol[0];
+              vm.show_alert(msg,"failure");
+            };
+          };
         });
       } else {
         vm.show_alert(" No Company is listed with given Symbol", "failure");
       }
     }
 
+    function addToExisting(){
+      
+      vm.formdata.invested_price = Math.ceil((vm.selected_stock.invested_amount + 
+        vm.formdata.N_stocks*vm.formdata.invested_price )/(vm.formdata.N_stocks+
+        vm.selected_stock.N_stocks)*100)/100;
+      vm.formdata.N_stocks += vm.selected_stock.N_stocks;
+      vm.formdata.symbol = vm.selected_stock.symbol;
+      vm.formdata.company_name = vm.selected_stock.companyName;
+      vm.formdata.target_price = vm.selected_stock.target_price;
+      vm.formdata.trigger_price_high = vm.selected_stock.trigger_price_high;
+      vm.formdata.trigger_price_low = vm.selected_stock.trigger_price_low;
+
+      id = vm.selected_stock.id;
+      
+      Layout.edit_stock(id, vm.formdata)
+      .then(function successCallback(response){
+        vm.show_alert(" Stock added in your portfolio", "success");
+        vm.clearSelected();
+        vm.get_stocks();
+      }, function failureCallback(response){
+        vm.show_alert("Error Occured!","failure");
+      });
+    }
+
+    function editStock(){
+      vm.selected_stock['company_name'] = vm.selected_stock['companyName'];
+
+      Layout.edit_stock(vm.selected_stock.id , vm.selected_stock)
+      .then(function successCallback(response){
+        vm.show_alert(" Stock values updated", "success");
+        vm.clearSelected();
+        vm.get_stocks();
+      }, function failureCallback(response){
+        vm.show_alert("Error Occured!","failure");
+      });
+    }
+    function delete_stock(){
+      Layout.delete_stock(vm.selected_stock.id)
+      .then(function(response){
+        vm.show_alert("Stock is deleted!","success");
+        vm.get_stocks();
+        vm.clearSelected();
+      });
+    }
+
+    function createRefreshOptionList(){
+      for (var i = vm.refreshOption.length - 1; i >= 0; i--) {
+        if (vm.refreshOption[i] >= 60) {
+          vm.refreshOptionList.push({"time": (vm.refreshOption[i]/60).toString() + " minutes","id": i });
+        } else {
+          vm.refreshOptionList.push({"time": vm.refreshOption[i].toString() + " seconds","id": i });
+        }
+      };
+    }
+    function clearSelected(){
+      vm.selected_stock = {};
+      vm.formdata = {};
+      vm.formdata.symbol = "";
+      vm.formdata.company_name = "";
+      vm.stock_operation = "";
+    }
     function alert(msg,type){
 
       vm.alert.message = msg;
@@ -106,8 +181,7 @@
         vm.notification_text_high = ""
         vm.notification_text_low = ""
         if (vm.stocksList.length > 0) {
-          $scope.selected_stock = vm.stocksList[0].id;
-
+        
           if (Notification.permission == "granted") {
 
             for (var i = vm.stocksList.length - 1; i >= 0; i--) {

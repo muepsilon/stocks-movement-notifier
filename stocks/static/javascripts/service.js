@@ -15,7 +15,8 @@
         get_stocks :      get_stocks,
         delete_stock:     delete_stock,
         validate_symbol:  validate_symbol,
-        add_stock:        add_stock
+        add_stock:        add_stock,
+        edit_stock:       edit_stock
       };
 
       return Layout;
@@ -38,6 +39,9 @@
         return $http.post(BASE_URL + "api/stocks/",data);
       }
 
+      function edit_stock(id, data){
+        return $http.put(BASE_URL + "api/stocks/" + id.toString(), data);
+      }
     };
 
 })();

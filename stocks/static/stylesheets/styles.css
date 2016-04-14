@@ -1,5 +1,11 @@
 /*CSS*/
 
+/*
+red-shade: rgb(223,81,76);
+green-shade: rgb(31,218,154);
+blue-shade: rgb(40,171,227);
+yellow-shade: rgb();
+*/
 body{
   background-color: rgb(240,240,240); 
 }
@@ -12,22 +18,27 @@ body{
   padding: 0;
 }
 .header{
-  background-color: rgb(94,68,193);
+  background-color: rgb(40,171,227);
   color:  white;
   width: 100%;
 }
 
 .positive{
-  background-color: green;
+  background-color: rgb(31,218,154);
   color: white;
   transition: all 0.3s ease 0s;
 }
 .negative{
-  background-color: red;
+  background-color: rgb(223,81,76);
   color: white;
   transition: all 0.3s ease 0s;
 }
-
+.up-arrow{
+  color: green;
+}
+.down-arrow{
+  color: red;
+}
 .edit-options{
   margin:    30px 0;
 }
@@ -44,4 +55,13 @@ body{
 }
 .table{
   font-size: 14px;
+}
+.operations{
+  padding-top: 30px;
+}
+.add-options{
+  margin-bottom: 20px;
+}
+.settings{
+  text-align: right;
 }
