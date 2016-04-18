@@ -1,31 +1,48 @@
-
-<div class="col-xs-12 header">
-  <h3>Stock Watch</h3>
-</div>
 <div class="col-xs-12" ng-show="vm.showpage">
 
   <div class="col-xs-12 overall-portfolio">
-    <div class="col-xs-6">
-      <div class="col-xs-12">
-        <div class="col-xs-6 pLabel">Investments</div>
-        <div class="col-xs-6 pValue">{{vm.portfolio.invested_amount}}</div>
-      </div>
-      <div class="col-xs-12">
-        <div class="col-xs-6 pLabel">Change</div>
-        <div class="col-xs-6 pValue">
-          <span class="glyphicon glyphicon-triangle-top up-arrow" ng-show="vm.portfolio.change > 0"></span>
-          <span class="glyphicon glyphicon-triangle-down down-arrow" ng-show="vm.portfolio.change < 0"></span> 
-          {{vm.portfolio.change}}({{vm.portfolio.percent_change}}%)</div>
+    <div class="col-xs-4 small-padding-rl">
+      <div class="col-xs-12 card">
+        <div class="col-xs-12 ">
+          <div class="col-xs-6 pLabel">Investments</div>
+          <div class="col-xs-6 pValue">{{vm.portfolio.invested_amount | number: 0}}</div>
+        </div>
+        <div class="col-xs-12 ">
+          <div class="col-xs-6 pLabel">Value</div>
+          <div class="col-xs-6 pValue">{{vm.portfolio.latestValue | number: 0}}</div>
+        </div>
       </div>
     </div>
-    <div class="settings col-xs-6">
+    <div class="col-xs-4 small-padding-rl">
+      <div class="col-xs-12 card">
+        <div class="col-xs-12">
+          <div class="col-xs-6 pLabel">Daily Change</div>
+          <div class="col-xs-6 pValue">
+            <span class="glyphicon glyphicon-triangle-top up-arrow" ng-show="vm.portfolio.daily_change > 0"></span>
+            <span class="glyphicon glyphicon-triangle-down down-arrow" ng-show="vm.portfolio.daily_change < 0"></span> 
+            {{vm.portfolio.daily_change | number: 0}}({{vm.portfolio.daily_change_percent | number: 2}}%)
+          </div>
+        </div>
+        <div class="col-xs-12">
+          <div class="col-xs-6 pLabel">Overall Change</div>
+          <div class="col-xs-6 pValue">
+            <span class="glyphicon glyphicon-triangle-top up-arrow" ng-show="vm.portfolio.change > 0"></span>
+            <span class="glyphicon glyphicon-triangle-down down-arrow" ng-show="vm.portfolio.change < 0"></span> 
+            {{vm.portfolio.change | number: 0}}({{vm.portfolio.percent_change | number: 2}}%)</div>
+        </div>
+      </div>
+    </div>
+    <div class="settings col-xs-4">
+      <div class="col-xs-12">
+        <div class="last-update">Last updated at: {{ vm.date | date : 'dd-MMM HH:mma'}}</div>
+      </div>
       <div class="col-xs-12">
         <button class="btn btn-success" ng-click="vm.get_stocks()">Refresh</button>
       </div>
     </div>
   </div>
   <div class="col-xs-12 edit-options">
-
+    
     <h4>Update Portfolio</h4>
 
     <button class="btn btn-success" ng-click = "vm.stock_operation = 'add'">Add</button>

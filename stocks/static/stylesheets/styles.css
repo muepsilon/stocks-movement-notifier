@@ -3,11 +3,13 @@
 /*
 red-shade: rgb(223,81,76);
 green-shade: rgb(31,218,154);
-blue-shade: rgb(40,171,227);
+blue-shade: rgb(0,171,226);
 yellow-shade: rgb();
 */
 body{
-  background-color: rgb(240,240,240); 
+  background-color: rgb(241,241,241); 
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
 }
 .container{
   width: 80%;
@@ -18,11 +20,21 @@ body{
   padding: 0;
 }
 .header{
-  background-color: rgb(40,171,227);
+  background-color: rgb(0,171,226);
   color:  white;
   width: 100%;
 }
-
+.title{
+  font-size: 24px;
+  font-weight: 300;
+  padding: 10px;
+}
+.card{
+  padding:1.0rem;
+  box-shadow:0 1px 2px #aaa;
+  background:white;
+  border-radius:3px;
+}
 .positive{
   background-color: rgb(31,218,154);
   color: white;
@@ -40,18 +52,19 @@ body{
   color: red;
 }
 .edit-options{
-  margin:    30px 0;
+  margin:    30px 15px;
 }
 .overall-portfolio{
   font-size: 16px;
   margin:  20px 0;
 }
 .overall-portfolio .pLabel{
-  font-weight: bold;
-  padding:    10px;
+  font-weight: 300;
+  padding:    5px 0;
 }
 .overall-portfolio .pValue{
-  padding: 10px;
+  font-weight: 400;
+  padding: 5px 0;
 }
 .table{
   font-size: 14px;
@@ -64,4 +77,20 @@ body{
 }
 .settings{
   text-align: right;
+}
+.small-padding-rl{
+  padding: 0 4px;
+}
+.last-update{
+  font-size: 14px;
+  padding: 10px 0;
+  color: #6c6c6c;
+}
+#loading-bar .bar{
+  background: #e50000;
+}
+#loading-bar-spinner .spinner-icon {
+  
+  border-top-color:  #e50000;
+  border-left-color: #e50000;
 }

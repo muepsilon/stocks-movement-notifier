@@ -119,6 +119,8 @@ BOWER_INSTALLED_APPS = (
     "angular-ui-router",
     "bootbox",
     "bootstrap",
+    "angular-loading-bar",
+    'ngAnimate',
     )
 
 REST_FRAMEWORK = {

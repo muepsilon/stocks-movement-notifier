@@ -22,7 +22,7 @@
       return Layout;
 
       function get_stocks(){
-        return $http.get(BASE_URL + "stocks/portfolio");
+        return $http.get(BASE_URL + "api/latestprice/stocks");
       }
 
       function delete_stock(id){
@@ -30,7 +30,7 @@
       }
 
       function validate_symbol(symbol){
-        return $http.get(BASE_URL + "stocks/validateSymbol?symbol=" + symbol)
+        return $http.get(BASE_URL + "api/company/find?symbol=" + symbol)
         .success(function(){
         });
       }

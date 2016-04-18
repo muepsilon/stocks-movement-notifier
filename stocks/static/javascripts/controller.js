@@ -20,7 +20,7 @@
     vm.show_alert = alert;
     vm.notification_text_high = "";
     vm.notification_text_low = "";
-    vm.process = {"searching": false};
+    vm.process = {"searching": false, "updating": false};
     vm.clearSelected = clearSelected;
     vm.delete_stock = delete_stock;
     vm.addToExisting = addToExisting;
@@ -28,13 +28,17 @@
     vm.editStock = editStock;
     vm.stock_operation = "";
     vm.stock_id = 0;
+    vm.date = new Date();
     vm.formdata = {};
     vm.formdata.symbol = "";
     vm.formdata.company_name = "";
     vm.portfolio = {};
     vm.portfolio.invested_amount = 0;
+    vm.portfolio.daily_change = 0;
+    vm.portfolio.daily_change_percent = 0;
     vm.portfolio.change = 0;
     vm.portfolio.percent_change = 0;
+    vm.portfolio.latestValue = 0;
     vm.selected_stock = "";
     vm.get_stocks();
 
@@ -158,6 +162,7 @@
       }, 3000);
     }
     function get_stocks(){
+      vm.process.updating = true;
       Layout.get_stocks()
       .then(function(response){
 
@@ -168,15 +173,22 @@
         vm.portfolio.change = 0;
         vm.portfolio.invested_amount = 0;
         vm.portfolio.percent_change = 0;
+        vm.portfolio.daily_change = 0;
+        vm.portfolio.daily_change_percent = 0;
+        vm.portfolio.latestValue = 0;
+
 
         for (var i = vm.stocksList.length - 1; i >= 0; i--) {
           vm.portfolio.invested_amount += vm.stocksList[i].invested_amount;
-          vm.portfolio.change += vm.stocksList[i].amount_change;
+          vm.portfolio.daily_change += vm.stocksList[i].daily_amount_change;
+          vm.portfolio.latestValue += vm.stocksList[i].latest_value;
         };
-        vm.portfolio.percent_change = Math.ceil(vm.portfolio.change/vm.portfolio.invested_amount*10000)/100;
-
+        vm.portfolio.change = vm.portfolio.latestValue - vm.portfolio.invested_amount
+        vm.portfolio.percent_change = vm.portfolio.change/vm.portfolio.invested_amount*100;
+        vm.portfolio.daily_change_percent = vm.portfolio.daily_change/vm.portfolio.invested_amount*100;
         vm.showpage = true;
-
+        vm.process.updating = false;
+        vm.date = Date.now();
         // Notification system
         vm.notification_text_high = ""
         vm.notification_text_low = ""
@@ -212,5 +224,16 @@
 
     });
     }
+  };
+
+  angular.module('stockWatch.controllers')
+    .controller('companyDetailsController', companyDetailsController);
+
+  companyDetailsController.$inject = ['$scope','Layout','$interval','$window','$timeout'];
+
+  function companyDetailsController($scope,Layout, $interval,$window,$timeout){
+
+    var vm = this;
+    
   };
 })();

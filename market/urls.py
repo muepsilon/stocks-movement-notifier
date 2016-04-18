@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+import stocks.views as views
 from stocks.models import Stock
 from django.http import HttpResponseRedirect
 from rest_framework import routers, serializers, viewsets
@@ -32,9 +33,13 @@ class StockViewSet(viewsets.ModelViewSet):
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r'api/stocks', StockViewSet)
+router.register(r'stocks', StockViewSet)
 
 urlpatterns = [
-    url(r'^', include(router.urls)),
-    url(r'^stocks/', include('stocks.urls')),
+    url(r'^$', views.index, name="index"),
+    url(r'^api/company/find',views.is_valid_symbol, name="validate_symbol"),
+    url(r'^api/company/^[0-9]+$',views.company_info, name="comapany_info"),
+    url(r'^api/latestprice/stocks/$',views.portfolio, name="portfolio"),
+    url(r'^api/', include(router.urls,namespace="api")),
+    url(r'^(?P<path>.*)/$', views.angular_router, name="index"),
 ]
