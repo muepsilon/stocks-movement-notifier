@@ -14,9 +14,13 @@
       var Layout = {
         get_stocks :      get_stocks,
         delete_stock:     delete_stock,
-        validate_symbol:  validate_symbol,
+        validate_company_name:  validate_company_name,
         add_stock:        add_stock,
-        edit_stock:       edit_stock
+        is_logged_in:     is_logged_in,
+        edit_stock:       edit_stock,
+        login:            login,
+        signup:           signup,
+        logout:           logout 
       };
 
       return Layout;
@@ -29,8 +33,8 @@
         return $http.delete(BASE_URL + "api/stocks/" + id.toString());
       }
 
-      function validate_symbol(symbol){
-        return $http.get(BASE_URL + "api/company/find?symbol=" + symbol)
+      function validate_company_name(query){
+        return $http.get(BASE_URL + "api/company/find/?query=" + query)
         .success(function(){
         });
       }
@@ -41,6 +45,19 @@
 
       function edit_stock(id, data){
         return $http.put(BASE_URL + "api/stocks/" + id.toString(), data);
+      }
+
+      function login (data) {
+        return $http.post(BASE_URL + "api/accounts/login/", data)
+      }
+      function signup (data) {
+        return $http.post(BASE_URL + "api/accounts/signup/", data)
+      }
+      function logout () {
+        return $http.post(BASE_URL + "api/accounts/logout/")
+      }
+      function is_logged_in(){
+        return $http.post(BASE_URL + "api/accounts/verifysession/")
       }
     };
 

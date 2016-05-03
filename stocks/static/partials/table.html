@@ -10,7 +10,7 @@
       <th>Profit/Loss</th>
     </tr>
     <tr ng-repeat = "stock in vm.stocksList">
-      <td>{{stock.companyName}}</td>
+      <td><a class="alink" ui-sref='company({name: (stock.companyName | spaceless), id: stock.id })'>{{stock.companyName}}</a></td>
       <td>{{stock.invested_price}}</td>
       <td>{{stock.target_price}}</td>
       <td>{{stock.lastPrice}}</td>

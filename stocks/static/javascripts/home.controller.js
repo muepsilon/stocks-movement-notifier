@@ -1,13 +1,13 @@
-// Required controllers
+// Index controllers
 
 (function(){
 
-  angular.module('stockWatch.controllers',[])
+  angular.module('stockWatch.controllers')
     .controller('indexController', indexController);
 
-  indexController.$inject = ['$scope','Layout','$interval','$window','$timeout'];
+  indexController.$inject = ['$scope','Layout','$interval','$window','$timeout','$http'];
 
-  function indexController($scope,Layout, $interval,$window,$timeout){
+  function indexController($scope,Layout, $interval,$window,$timeout,$http){
 
     var vm = this;
     vm.showpage = false;
@@ -20,7 +20,7 @@
     vm.show_alert = alert;
     vm.notification_text_high = "";
     vm.notification_text_low = "";
-    vm.process = {"searching": false, "updating": false};
+    vm.process = {"updating": false};
     vm.clearSelected = clearSelected;
     vm.delete_stock = delete_stock;
     vm.addToExisting = addToExisting;
@@ -41,29 +41,32 @@
     vm.portfolio.latestValue = 0;
     vm.selected_stock = "";
     vm.get_stocks();
-
+    $scope.dropdown = {"search": true };
+    vm.companySuggestion = [];
+    vm.selectCompany = selectCompany;
+    vm.showSearchSuggetsion = showSearchSuggetsion;
     vm.createRefreshOptionList();
+    vm.duringExhangeOpen = duringExhangeOpen;
+    vm.searchSuggestion = searchSuggestion;
     vm.setInterval = vm.refreshOptionList[3];
 
-    $interval(vm.get_stocks, 1000*vm.refreshOption[vm.setInterval.id]);
+    $interval(vm.duringExhangeOpen, 1000*vm.refreshOption[vm.setInterval.id]);
 
-    $scope.$watch(function(){return vm.formdata.symbol},function(){
-      if (vm.formdata.symbol !== undefined) {
-        if(vm.formdata.symbol.length > 0){
-          vm.process.searching = true;
-          Layout.validate_symbol(vm.formdata.symbol)
-          .then(function(response){
-            if (response.data.is_valid == true) {
-              vm.formdata.company_name = response.data.companyName;
-            } else {
-              vm.formdata.company_name = "";
-            }
-            vm.process.searching = false;
-          });
-        }
-      };
-    })
     // Function blocks
+    function searchSuggestion(){
+      if (vm.formdata.company_name != undefined && vm.formdata.company_name.length > 0) {
+        Layout.validate_company_name(vm.formdata.company_name)
+        .then(function(response){
+            vm.companySuggestion = response.data;
+            vm.formdata.symbol = "";
+            $scope.dropdown.search = true;
+        });
+      } else {
+        vm.formdata.symbol = "";
+        vm.companySuggestion = [];
+      }
+    }
+
     function add_stock(){
       if (vm.formdata.company_name.length > 1){
         Layout.add_stock(vm.formdata).then(function successCallback(response){
@@ -127,7 +130,9 @@
         vm.clearSelected();
       });
     }
-
+    function showSearchSuggetsion() {
+      return (vm.companySuggestion.length > 0) && vm.formdata.symbol.length == 0 && $scope.dropdown.search
+    }
     function createRefreshOptionList(){
       for (var i = vm.refreshOption.length - 1; i >= 0; i--) {
         if (vm.refreshOption[i] >= 60) {
@@ -143,6 +148,11 @@
       vm.formdata.symbol = "";
       vm.formdata.company_name = "";
       vm.stock_operation = "";
+    }
+    function selectCompany(item){
+      vm.formdata.symbol = item.symbol;
+      vm.formdata.company_name = item.name;
+      vm.companySuggestion = [];
     }
     function alert(msg,type){
 
@@ -160,6 +170,12 @@
           vm.alert.failure = false;
         }
       }, 3000);
+    }
+    function duringExhangeOpen(){
+      var date = new Date();
+      if (date.getHours() > 9 && date.getHours() < 16) {
+        vm.get_stocks();
+      };
     }
     function get_stocks(){
       vm.process.updating = true;
@@ -224,16 +240,5 @@
 
     });
     }
-  };
-
-  angular.module('stockWatch.controllers')
-    .controller('companyDetailsController', companyDetailsController);
-
-  companyDetailsController.$inject = ['$scope','Layout','$interval','$window','$timeout'];
-
-  function companyDetailsController($scope,Layout, $interval,$window,$timeout){
-
-    var vm = this;
-    
   };
 })();

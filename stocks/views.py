@@ -1,41 +1,76 @@
 from django.shortcuts import render
+import urllib, re, datetime, json, math
+from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse,HttpResponseBadRequest
-import json
+from rest_framework_jwt.views import verify_jwt_token
 from nsetools import Nse
 from django.core import serializers
-from stocks.models import Stock
-import math
-from multiprocessing import Pool
+from stocks.models import Stock, CompanyList
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.decorators import api_view,authentication_classes, permission_classes
 
 # Create your views here.
-def index(request):
+def index(request, page_slug = None):
   return render(request,'stocks/index.html')
 
-def angular_router(request,path):
-  return render(request,'stocks/index.html')
+@require_http_methods(["GET"])
+def getCompanyNames(request):
+   
+  query = request.GET.get('query','').encode('ascii','ignore')
 
-def is_valid_symbol(request):
+  companyList = CompanyList.objects.filter(name__contains = query)[0:5]
 
-  if request.method == 'GET':
-
-    symbol = request.GET.get('symbol','').encode('ascii','ignore')
-    nse = Nse()
-    response = {}
-
-    if len(symbol) == 0:
-      return HttpResponseBadRequest("Bad Request",status = 400)
+  companyListDict = serializers.serialize("python", companyList)
   
-    if nse.is_valid_code(symbol):
-      response['is_valid'] = True
-      quote_data = nse.get_quote(symbol)
-      response['companyName'] = quote_data['companyName']
+  filteredList = [ item['fields'] for item in companyListDict ]
+
+  return HttpResponse(json.dumps(filteredList))
+
+
+def company_info(request,symbol):
+  
+  try:
+    company = CompanyList.objects.get(symbol = symbol)
+    isValid = True
+  except:
+    isValid = False
+
+  if isValid:
+    
+    symbol = symbol.encode('ascii','ignore')
+
+    if 'timeframe' in request.GET:
+      timeframe = request.GET.get('timeframe')
+      if timeframe is not None and timeframe != '':
+        if re.search('[0-9]+[my]',timeframe):
+          if re.search('[0-9]+[m]',timeframe):
+            months = re.search('[0-9]+',timeframe).group(0)
+            start_date = datetime.date.today() - datetime.timedelta(days=30*int(months))
+            collapse = 'daily'
+          else:
+            years = re.search('[0-9]+',timeframe).group(0)
+            start_date = datetime.date.today() - datetime.timedelta(days=365*int(years))
+            collapse = 'weekly'   
+        else:
+          return HttpResponseBadRequest("timeframe parameter is invalid", status = 400)
+      else:
+        return HttpResponseBadRequest("timeframe parameter is invalid", status = 400)
     else:
-      response['is_valid'] = False;
+      start_date = datetime.date.today() - datetime.timedelta(days=1*365)
+      collapse = 'weekly'
 
-    return HttpResponse(json.dumps(response))
+    start_date = start_date.strftime('%Y-%m-%d')
+    response = urllib.urlopen('https://www.quandl.com/api/v3/datasets/NSE/'+ \
+       symbol + ".json?api_key=o3Bix1gXUrHz3dFPCM9x&start_date="+ start_date + "&collapse=" + collapse)
+    
+    return HttpResponse(response.read())
 
-def company_info(request):
-  pass
+  else:
+
+    return HttpResponseBadRequest("Bad Request", status = 400)
+
 def get_quote(stock):
   # Get value from NSE
   nse = Nse()
@@ -70,6 +105,16 @@ def get_stock_info(request,param):
 def stocks_list(request):
   stocks = serializers.serialize("json", Stock.objects.all())
   return HttpResponse(stocks)
+
+@api_view(['GET'])
+@authentication_classes((JSONWebTokenAuthentication))
+@permission_classes((IsAuthenticated,))
+def example_view(request, format=None):
+    content = {
+        'user': unicode(request.user),  # `django.contrib.auth.User` instance.
+        'auth': unicode(request.auth),  # None
+    }
+    return Response(content)
 
 def portfolio(request):
 
